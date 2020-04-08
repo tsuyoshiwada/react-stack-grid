@@ -1,0 +1,11 @@
+[ignore]
+.*/node_modules/.*
+
+[include]
+
+[libs]
+./src/declares
+
+[options]
+esproposal.class_static_fields=enable
+esproposal.export_star_as=enable
