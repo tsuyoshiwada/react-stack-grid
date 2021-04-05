@@ -5,7 +5,7 @@
     "allowSyntheticDefaultImports": true,
     "module": "esNext",
     "target": "es6",
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noImplicitAny": true,
