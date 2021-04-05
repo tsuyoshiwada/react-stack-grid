@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "outDir": "lib",
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "esNext",
+    "target": "es6",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "noImplicitThis": true,
+    "strict": true,
+    "jsx": "react",
+    "lib": [
+      "es2019",
+      "dom"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
