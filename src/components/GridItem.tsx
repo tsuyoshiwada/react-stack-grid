@@ -1,12 +1,15 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import shallowequal from 'shallowequal'
 
-import {transition, buildStyles } from '../utils/style-helper'
-import { raf } from '../animations/request-animation-frame'
-import {Units, Rect, Styles, ContainerSize, TransitionCB} from '../types/'
+import Transition, {TransitionProps} from 'react-transition-group/Transition'
+
+import {buildStyles, transition} from '../utils/style-helper'
+import {raf} from '../animations/request-animation-frame'
+import {ContainerSize, Rect, Styles, TransitionCB, Units} from '../types/'
 import {Transitions} from '../animations/transitions'
 
+export type TransitionsCBS = { transitions: Record<Transitions, TransitionCB> }
 
 type Props = {
   itemKey: string
@@ -17,29 +20,18 @@ type Props = {
   duration: number
   easing: string
   appearDelay: number
-  appear: TransitionCB
-  appeared: TransitionCB
-  enter: TransitionCB
-  entered: TransitionCB
-  leaved: TransitionCB
   units: Units
   vendorPrefix: boolean
-  userAgent: string | undefined | null
   onMounted: (item: GridItem) => void
   onUnmount: (item: GridItem) => void
   rtl: boolean
-}
+  //userAgent: string | undefined | null
+} & TransitionsCBS
 
 type State = Record<string, any>
 
-const getTransitionStyles = (type: Transitions, props: Props): Styles => {
-  const {
-    rect,
-    containerSize,
-    index,
-  } = props
-  return props[type](rect, containerSize, index)
-}
+const getTransitionStyles = (type: Transitions, {rect, containerSize, index, transitions}: Props): Styles =>
+  transitions[type](rect, containerSize, index)
 
 const getPositionStyles = (rect: Rect, zIndex: number, rtl: boolean): Styles => ({
   translateX: `${rtl ? -Math.round(rect.left) : Math.round(rect.left)}px`,
@@ -47,7 +39,9 @@ const getPositionStyles = (rect: Rect, zIndex: number, rtl: boolean): Styles => 
   zIndex: zIndex.toString(),
 })
 
-export default class GridItem extends Component<Props, State> {
+type ItemProps = Props & TransitionProps
+
+export default class GridItem extends Component<ItemProps, State> {
   node: Element | null = null
   mounted: boolean
   appearTimer: number | undefined
@@ -70,23 +64,25 @@ export default class GridItem extends Component<Props, State> {
     duration: PropTypes.number,
     easing: PropTypes.string,
     appearDelay: PropTypes.number,
-    appear: PropTypes.func,
-    appeared: PropTypes.func,
-    enter: PropTypes.func,
-    entered: PropTypes.func,
-    leaved: PropTypes.func,
+    transitions: PropTypes.shape({
+      appear: PropTypes.func,
+      appeared: PropTypes.func,
+      enter: PropTypes.func,
+      entered: PropTypes.func,
+      leaved: PropTypes.func,
+    }),
     units: PropTypes.shape({
       length: PropTypes.string,
       angle: PropTypes.string,
     }),
     vendorPrefix: PropTypes.bool,
-    userAgent: PropTypes.string,
+    //userAgent: PropTypes.string,
     onMounted: PropTypes.func,
     onUnmount: PropTypes.func,
     rtl: PropTypes.bool,
   }
 
-  constructor(props: Props) {
+  constructor(props: ItemProps) {
     super(props)
     this.mounted = false
     this.appearTimer = undefined
@@ -100,6 +96,7 @@ export default class GridItem extends Component<Props, State> {
   componentDidMount() {
     this.mounted = true
     this.props.onMounted(this)
+    this.setAppearedStyles()
   }
 
   componentWillUnmount() {
@@ -113,7 +110,8 @@ export default class GridItem extends Component<Props, State> {
     const sameProps = shallowequal(nextProps, this.props)
     if (!sameProps) {
       raf(() => {
-        this.setStateIfNeeded({ ...this.state,
+        this.setStateIfNeeded({
+          ...this.state,
           ...getPositionStyles(nextProps.rect, 2, nextProps.rtl),
         })
       })
@@ -121,24 +119,24 @@ export default class GridItem extends Component<Props, State> {
     return !sameProps || !shallowequal(nextState, this.state)
   }
 
-  componentWillAppear(callback: () => void) {
-    this.appearTimer = setTimeout(callback, this.props.appearDelay * this.props.index)
+  componentWillAppear = (callback: () => void) => {
+    this.appearTimer = window.setTimeout(callback, this.props.appearDelay * this.props.index)
   }
 
-  componentDidAppear() {
+  componentDidAppear = () => {
     this.setAppearedStyles()
   }
 
-  componentWillEnter(callback: () => void) {
+  componentWillEnter = (callback: () => void) => {
     this.setEnterStyles()
     this.forceUpdate(callback)
   }
 
-  componentDidEnter() {
+  componentDidEnter = () => {
     this.setEnteredStyles()
   }
 
-  componentWillLeave(callback: () => void) {
+  componentWillLeave = (callback: () => void) => {
     this.setLeaveStyles()
     setTimeout(callback, this.props.duration)
   }
@@ -157,7 +155,7 @@ export default class GridItem extends Component<Props, State> {
     })
   }
 
-  setEnterStyles() {
+  setEnterStyles = () => {
     this.setStateIfNeeded({
       ...this.state,
       ...getPositionStyles(this.props.rect, 2, this.props.rtl),
@@ -165,7 +163,7 @@ export default class GridItem extends Component<Props, State> {
     })
   }
 
-  setEnteredStyles() {
+  setEnteredStyles = () => {
     this.setStateIfNeeded({
       ...this.state,
       ...getTransitionStyles('entered', this.props),
@@ -173,7 +171,7 @@ export default class GridItem extends Component<Props, State> {
     })
   }
 
-  setLeaveStyles() {
+  setLeaveStyles = () => {
     this.setStateIfNeeded({
       ...this.state,
       ...getPositionStyles(this.props.rect, 2, this.props.rtl),
@@ -187,11 +185,7 @@ export default class GridItem extends Component<Props, State> {
       component,
       containerSize,
       appearDelay,
-      appear,
-      appeared,
-      enter,
-      entered,
-      leaved,
+      transitions,
       onMounted,
       onUnmount,
       itemKey,
@@ -201,22 +195,35 @@ export default class GridItem extends Component<Props, State> {
       units,
       vendorPrefix,
       rtl,
+      children,
       ...rest
     } = this.props
-    const style = buildStyles({ ...this.state,
-      display: 'block',
-      position: 'absolute',
-      top: '0',
-      ...(rtl ? {
-        right: '0',
-      } : {
-        left: '0',
-      }),
-      width: rect.width.toString(),
-      transition: transition(['opacity', 'transform'], duration, easing),
-    }, units, vendorPrefix)
-
-    return React.createElement(component, {...rest, ref: node => this.node = node, style})
+    return (
+      <Transition
+        in
+        timeout={duration}
+        {...rest}
+        onEnter={this.setEnterStyles}
+        onEntered={this.setEnteredStyles}
+        onExit={this.setLeaveStyles}
+      >
+        {React.createElement(component, {
+          ref: (node: Element) => this.node = node,
+          style: buildStyles({
+            ...this.state,
+            display: 'block',
+            position: 'absolute',
+            top: 0,
+            ...(rtl ? {
+              right: 0,
+            } : {
+              left: 0,
+            }),
+            width: rect.width,
+            transition: transition(['opacity', 'transform'], duration, easing),
+          }, units, vendorPrefix),
+        }, children)}
+      </Transition>
+    )
   }
-
 }

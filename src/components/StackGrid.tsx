@@ -1,4 +1,4 @@
-import React, { Component, isValidElement } from 'react'
+import React, {Component, isValidElement} from 'react'
 import ReactDOM from 'react-dom'
 import TransitionGroup from 'react-transition-group/TransitionGroup'
 import sizeMe from 'react-sizeme'
@@ -6,12 +6,12 @@ import shallowequal from 'shallowequal'
 import ExecutionEnvironment from 'exenv'
 import invariant from 'invariant'
 
-import GridItem from './GridItem'
-import { transition } from '../utils/style-helper'
+import GridItem, {TransitionsCBS} from './GridItem'
+import {transition} from '../utils/style-helper'
 //import { raf } from '../animations/request-animation-frame'
 import * as easings from '../animations/easings'
 import * as transitions from '../animations/transitions/'
-import {Styles, TransitionCB, Units} from '../types/'
+import {Styles, Units} from '../types/'
 
 //TODO: return images load
 //const imagesLoaded = ExecutionEnvironment.canUseDOM ? require('imagesloaded') : null
@@ -54,19 +54,14 @@ type Props = {
   duration: number
   easing: string
   appearDelay: number
-  appear: TransitionCB
-  appeared: TransitionCB
-  enter: TransitionCB
-  entered: TransitionCB
-  leaved: TransitionCB
   units: Units
-  //monitorImagesLoaded: boolean
   vendorPrefix: boolean
-  userAgent: string | undefined | null
   enableSSR: boolean
   onLayout: () => void
   horizontal: boolean
   rtl: boolean
+  //monitorImagesLoaded: boolean
+  //userAgent: string | undefined | null
 }
 
 type InlineState = {
@@ -81,7 +76,7 @@ type InlineState = {
   columnWidth: number
 }
 
-type InlineProps = Props & {
+type InlineProps = Props & TransitionsCBS & {
   refCallback: (grid: GridInline) => void
   size: {
     width: number
@@ -181,7 +176,10 @@ export class GridInline extends Component<InlineProps, InlineState> {
         }
       })
     } else {
-      const sumHeights = childArray.reduce((sum: number, child) => sum + Math.round(this.getItemHeight(child)) + gutterHeight, 0)
+      const sumHeights = childArray.reduce<number>(
+        (sum, child) => sum + Math.round(this.getItemHeight(child)) + gutterHeight,
+        0
+      )
       const maxHeight = sumHeights / maxColumn
       let currentColumn = 0
       rects = childArray.map(child => {
@@ -308,11 +306,12 @@ export class GridInline extends Component<InlineProps, InlineState> {
       width: size.width == null ? 0 : size.width,
       height,
     }
-    const validChildren = React.Children.toArray(children).filter(child => isValidElement(child))
+    const validChildren = React.Children.toArray(children)
+      .flatMap((child, i) => (rects[i] && isValidElement(child)) ? [child] : [])
 
     return (
       <TransitionGroup
-        component={component}
+        component={component as any}
         className={className}
         style={{
           ...(style || {}),
@@ -323,8 +322,9 @@ export class GridInline extends Component<InlineProps, InlineState> {
         ref={this.handleRef}
       >
         {validChildren.map((child, i) => {
-          const key = (typeof child === 'object' && 'key' in child) ? child.key : undefined
+          const key = (typeof child === 'object' && 'key' in child) ? child.key ?? undefined : undefined
           return (
+            // @ts-ignore
             <GridItem
               {...rest}
               index={i}
@@ -339,7 +339,8 @@ export class GridInline extends Component<InlineProps, InlineState> {
             >
               {child}
             </GridItem>
-          )})}
+          )
+        })}
       </TransitionGroup>
     )
   }
@@ -350,7 +351,7 @@ const SizeAwareGridInline = sizeMe({
   monitorHeight: false,
 })(GridInline)
 
-export default class StackGrid extends Component<Props> {
+export default class StackGrid extends Component<Props & Partial<TransitionsCBS>> {
   static defaultProps = {
     style: {},
     gridRef: null,
@@ -362,22 +363,24 @@ export default class StackGrid extends Component<Props> {
     duration: 480,
     easing: easings.quartOut,
     appearDelay: 30,
-    appear: transitions.fadeUp.appear,
-    appeared: transitions.fadeUp.appeared,
-    enter: transitions.fadeUp.enter,
-    entered: transitions.fadeUp.entered,
-    leaved: transitions.fadeUp.leaved,
+    transitions: {
+      appear: transitions.fadeUp.appear,
+      appeared: transitions.fadeUp.appeared,
+      enter: transitions.fadeUp.enter,
+      entered: transitions.fadeUp.entered,
+      leaved: transitions.fadeUp.leaved,
+    },
     units: {
       length: 'px',
       angle: 'deg',
     },
-    monitorImagesLoaded: false,
     vendorPrefix: true,
-    userAgent: null,
     enableSSR: false,
     onLayout: null,
     horizontal: false,
     rtl: false,
+    //monitorImagesLoaded: false,
+    //userAgent: null,
   }
   grid!: GridInline
 
@@ -394,11 +397,8 @@ export default class StackGrid extends Component<Props> {
   }
 
   render() {
-    const {
-      gridRef,
-      ...rest
-    } = this.props
-    return <SizeAwareGridInline {...rest} refCallback={this.handleRef} />
+    const {gridRef, transitions, ...rest} = this.props
+    return <SizeAwareGridInline {...rest} transitions={transitions!} refCallback={this.handleRef}/>
   }
 
 }

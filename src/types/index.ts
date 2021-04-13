@@ -12,7 +12,7 @@ export type Units = {
   angle: AngleUnit
 }
 
-export type Styles = Record<string, string>
+export type Styles = Record<string, string | number>
 
 export type TransitionCB = (rect: Rect, size: ContainerSize, index: number) => Styles
 

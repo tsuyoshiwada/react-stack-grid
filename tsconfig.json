@@ -6,6 +6,7 @@
     "module": "esNext",
     "target": "es6",
     "inlineSourceMap": true,
+    "inlineSources": true,
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noImplicitAny": true,
