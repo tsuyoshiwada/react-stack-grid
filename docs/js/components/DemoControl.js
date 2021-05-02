@@ -1,60 +1,58 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable import/no-extraneous-dependencies */
-import React, { Component } from 'react';
-import Slider from 'rc-slider';
-import { easings, transitions } from '../../../src/';
+import React, { Component } from "react";
+import Slider from "rc-slider";
+import { easings, transitions } from "../../../src/";
 
-const selectEasingOptions = Object.keys(easings).map(k => ({
+const selectEasingOptions = Object.keys(easings).map((k) => ({
   label: k,
   value: easings[k],
 }));
 
-const selectTransitionOptions = Object.keys(transitions).map(k => ({
+const selectTransitionOptions = Object.keys(transitions).map((k) => ({
   label: k,
   value: k,
 }));
-
-
 export default class DemoControl extends Component {
   handleShuffle = () => {
     this.props.onShuffle();
-  }
+  };
 
   handlePrepend = () => {
     this.props.onPrepend();
-  }
+  };
 
   handleAppend = () => {
     this.props.onAppend();
-  }
+  };
 
   handleMultipleAppend = () => {
     this.props.onMultipleAppend();
-  }
+  };
 
   handleDurationChange = (value) => {
     this.props.onDurationChange(value);
-  }
+  };
 
   handleColumnWidthChange = (value) => {
     this.props.onColumnWidthChange(value);
-  }
+  };
 
   handleGutterChange = (value) => {
     this.props.onGutterChange(value);
-  }
+  };
 
   handleEasingChange = (e) => {
     this.props.onEasingChange(e.target.value);
-  }
+  };
 
   handleTransitionChange = (e) => {
     this.props.onTransitionChange(e.target.value);
-  }
+  };
 
   handleRTLChange = (e) => {
     this.props.onRTLChange(e.target.checked);
-  }
+  };
 
   render() {
     const {
@@ -69,21 +67,29 @@ export default class DemoControl extends Component {
     return (
       <div className="demo-control">
         <div>
-          <button className="btn" onClick={this.handleShuffle}>Shuffle</button>
+          <button className="btn" onClick={this.handleShuffle}>
+            Shuffle
+          </button>
         </div>
 
         <div />
 
         <div>
-          <button className="btn" onClick={this.handlePrepend}>Prepend</button>
+          <button className="btn" onClick={this.handlePrepend}>
+            Prepend
+          </button>
         </div>
 
         <div>
-          <button className="btn" onClick={this.handleAppend}>Append</button>
+          <button className="btn" onClick={this.handleAppend}>
+            Append
+          </button>
         </div>
 
         <div>
-          <button className="btn" onClick={this.handleMultipleAppend}>Multiple Append</button>
+          <button className="btn" onClick={this.handleMultipleAppend}>
+            Multiple Append
+          </button>
         </div>
 
         <div />
@@ -123,18 +129,22 @@ export default class DemoControl extends Component {
         <div>
           <label>Easing</label>
           <select value={easing} onChange={this.handleEasingChange}>
-            {selectEasingOptions.map(o =>
-              <option key={o.value} value={o.value}>{o.label}</option>
-            )}
+            {selectEasingOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </div>
 
         <div>
           <label>Transition</label>
           <select value={transition} onChange={this.handleTransitionChange}>
-            {selectTransitionOptions.map(o =>
-              <option key={o.value} value={o.value}>{o.label}</option>
-            )}
+            {selectTransitionOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </div>
 
