@@ -2,20 +2,20 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { Component } from 'react';
-import StackGrid, { transitions, easings } from '../../../src/';
-import DemoControl from '../components/DemoControl';
+import React, { Component } from "react";
+import StackGrid, { transitions, easings } from "../../../src/";
+import DemoControl from "../components/DemoControl";
 
 const itemModifier = [
-  'pattern1',
-  'pattern2',
-  'pattern3',
-  'gray',
-  'gray-light',
-  'gray-dark',
-  'yellow',
-  'pink',
-  'purple',
+  "pattern1",
+  "pattern2",
+  "pattern3",
+  "gray",
+  "gray-light",
+  "gray-dark",
+  "yellow",
+  "pink",
+  "purple",
 ];
 
 export default class Home extends Component {
@@ -34,15 +34,16 @@ export default class Home extends Component {
       columnWidth: 150,
       gutter: 5,
       easing: easings.quartOut,
-      transition: 'fadeDown',
+      transition: "fadeDown",
       rtl: false,
     };
   }
 
   createItem() {
     const id = Math.random().toString(36).substr(2, 9);
-    const height = Math.floor((Math.random() * (300 - 80)) + 80);
-    const modifier = itemModifier[Math.floor(Math.random() * itemModifier.length)];
+    const height = Math.floor(Math.random() * (300 - 80) + 80);
+    const modifier =
+      itemModifier[Math.floor(Math.random() * itemModifier.length)];
 
     return { id, height, modifier };
   }
@@ -59,19 +60,19 @@ export default class Home extends Component {
     }
 
     this.setState({ items: newItems });
-  }
+  };
 
   prependItem = () => {
     this.setState({
       items: [this.createItem(), ...this.state.items],
     });
-  }
+  };
 
   appendItem = () => {
     this.setState({
       items: [...this.state.items, this.createItem()],
     });
-  }
+  };
 
   multipleAppendItem = () => {
     const newItems = [];
@@ -83,37 +84,39 @@ export default class Home extends Component {
     this.setState({
       items: [...this.state.items, ...newItems],
     });
-  }
+  };
 
   removeItem = (id) => {
     this.setState({
-      items: this.state.items.filter(o => o.id !== id),
+      items: this.state.items.filter((o) => o.id !== id),
     });
-  }
+  };
 
   handleDurationChange = (duration) => {
     this.setState({ duration });
-  }
+  };
 
   handleColumnWidthChange = (columnWidth) => {
     this.setState({ columnWidth });
-  }
+  };
 
   handleGutterChange = (gutter) => {
     this.setState({ gutter });
-  }
+  };
 
   handleEasingChange = (easing) => {
     this.setState({ easing });
-  }
+  };
 
   handleTransitionChange = (transition) => {
+    
     this.setState({ transition });
-  }
+    
+  };
 
   handleRTLChange = (rtl) => {
     this.setState({ rtl });
-  }
+  };
 
   render() {
     const {
@@ -122,11 +125,10 @@ export default class Home extends Component {
       columnWidth,
       gutter,
       easing,
-      transition: transitionSelect,
+      transition,
       rtl,
     } = this.state;
 
-    const transition = transitions[transitionSelect];
     return (
       <div>
         <DemoControl
@@ -161,17 +163,17 @@ export default class Home extends Component {
           leaved={transition.leaved}
           rtl={rtl}
           onLayout={() => {
-            console.log('[DEMO] `onLayout()` has been called.'); // eslint-disable-line
+             // eslint-disable-line
           }}
         >
-          {items.map(item =>
-            (<div
+          {items.map((item) => (
+            <div
               key={item.id}
               className={`item item--${item.modifier}`}
               style={{ height: item.height }}
               onClick={() => this.removeItem(item.id)}
-            />)
-          )}
+            />
+          ))}
         </StackGrid>
       </div>
     );
